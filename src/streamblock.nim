@@ -38,8 +38,8 @@ proc readSerialised*(bitReader: BitReader): StreamBlock =
   result.last = bitReader.readBool()
   result.kind = bitReader.readBits(2, uint8).BlockKind
   case result.kind:
-    of uncompressed: result.rawBlock = rawblock.readRaw(bitReader)
-    of lzss: result.lzssBlock = lzssblock.readRaw(bitReader)
+    of uncompressed: result.rawBlock = rawblock.readSerialised(bitReader)
+    of lzss: result.lzssBlock = lzssblock.readSerialised(bitReader)
     else: raise newException(ValueError, "unhandled block type")
 
 proc writeSerialisedTo*(streamBlock: StreamBlock, bitWriter: BitWriter) =
