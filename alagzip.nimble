@@ -11,4 +11,3 @@ bin           = @["main"]
 # Dependencies
 
 requires "nim >= 0.19.0"
-
