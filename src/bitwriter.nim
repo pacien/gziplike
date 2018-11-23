@@ -1,4 +1,4 @@
-# "à-la-gzip" gzip-like LZSS compressor
+# gzip-like LZSS compressor
 # Copyright (C) 2018  Pacien TRAN-GIRARD
 #
 # This program is free software: you can redistribute it and/or modify

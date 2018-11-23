@@ -1,4 +1,4 @@
-"À-la-gzip" LZSS compressor
+gzip-like LZSS compressor
 ===========================
 
 A toy implementation of a simple gzip-like LZSS text compressor written in Nim.
