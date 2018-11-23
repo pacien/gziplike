@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import integers, bitstream
+import integers, bitreader, bitwriter
 
 const maxDataBitLength = 100_000_000 * wordBitLength # 100MB
 const bitLengthFieldBitLength = 2 * wordBitLength
@@ -23,18 +23,18 @@ type RawBlock* = object
   bitLength: int
   data: seq[uint8]
 
-proc readSerialised*(bitStream: BitStream): RawBlock =
-  let bitLength = bitStream.readBits(bitLengthFieldBitLength, uint16).int
-  let data = readSeq(bitStream, bitLength, uint8)
+proc readSerialised*(bitReader: BitReader): RawBlock =
+  let bitLength = bitReader.readBits(bitLengthFieldBitLength, uint16).int
+  let data = readSeq(bitReader, bitLength, uint8)
   RawBlock(bitLength: bitLength, data: data.data)
 
-proc writeSerialisedTo*(rawBlock: RawBlock, bitStream: BitStream) =
-  bitStream.writeBits(bitLengthFieldBitLength, rawBlock.bitLength.uint16)
-  writeSeq(bitStream, rawBlock.bitLength, rawBlock.data)
+proc writeSerialisedTo*(rawBlock: RawBlock, bitWriter: BitWriter) =
+  bitWriter.writeBits(bitLengthFieldBitLength, rawBlock.bitLength.uint16)
+  bitWriter.writeSeq(rawBlock.bitLength, rawBlock.data)
 
-proc readRaw*(bitStream: BitStream, bits: int = maxDataBitLength): RawBlock =
-  let data = readSeq(bitStream, bits, uint8)
+proc readRaw*(bitReader: BitReader, bits: int = maxDataBitLength): RawBlock =
+  let data = readSeq(bitReader, bits, uint8)
   RawBlock(bitLength: data.bitLength, data: data.data)
 
-proc writeRawTo*(rawBlock: RawBlock, bitStream: BitStream) =
-  writeSeq(bitStream, rawBlock.bitLength, rawBlock.data)
+proc writeRawTo*(rawBlock: RawBlock, bitWriter: BitWriter) =
+  bitWriter.writeSeq(rawBlock.bitLength, rawBlock.data)

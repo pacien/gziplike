@@ -14,19 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import bitstream
+import bitreader, bitwriter
 
 type LzssBlock* = object
   discard
 
-proc readSerialised*(bitStream: BitStream): LzssBlock =
+proc readSerialised*(bitReader: BitReader): LzssBlock =
   discard
 
-proc writeSerialisedTo*(lzssBlock: LzssBlock, bitStream: BitStream) =
+proc writeSerialisedTo*(lzssBlock: LzssBlock, bitWriter: BitWriter) =
   discard
 
-proc readRaw*(bitStream: BitStream): LzssBlock =
+proc readRaw*(bitReader: BitReader): LzssBlock =
   discard
 
-proc writeRawTo*(lzssBlock: LzssBlock, bitStream: BitStream) =
+proc writeRawTo*(lzssBlock: LzssBlock, bitWriter: BitWriter) =
   discard

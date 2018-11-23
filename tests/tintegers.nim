@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest
+import unittest, sequtils
 import integers
 
 suite "integers":
@@ -26,3 +26,7 @@ suite "integers":
     check truncateToUint8(0xFA'u8) == 0xFA'u8
     check truncateToUint8(0x00FA'u16) == 0xFA'u8
     check truncateToUint8(0xFFFA'u16) == 0xFA'u8
+
+  test "chunks iterator":
+    check toSeq(chunks(70, uint32)) == @[(0, 32), (1, 32), (2, 6)]
+    check toSeq(chunks(32, uint16)) == @[(0, 16), (1, 16)]

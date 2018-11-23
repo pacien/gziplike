@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams
-import bitstream, rawblock
+import bitreader, bitwriter, rawblock
 
 suite "rawblock":
   test "serialise":
@@ -23,14 +23,14 @@ suite "rawblock":
     defer: rawStream.close()
     rawStream.write(0xFEDC_BA98_7654_3210'u64)
     rawStream.setPosition(0)
-    let rawBitStream = rawStream.bitStream()
-    let rawBlock = rawblock.readRaw(rawBitStream)
+    let rawBitReader = rawStream.bitReader()
+    let rawBlock = rawblock.readRaw(rawBitReader)
 
     let outputStream = newStringStream()
     defer: outputStream.close()
-    let outputBitStream = outputStream.bitStream()
-    rawBlock.writeSerialisedTo(outputBitStream)
-    outputBitStream.flush()
+    let outputBitWriter = outputStream.bitWriter()
+    rawBlock.writeSerialisedTo(outputBitWriter)
+    outputBitWriter.flush()
 
     outputStream.setPosition(0)
     check outputStream.readUint16() == 64
@@ -43,14 +43,14 @@ suite "rawblock":
     serialisedStream.write(60'u16)
     serialisedStream.write(0xFEDC_BA98_7654_3210'u64)
     serialisedStream.setPosition(0)
-    let serialisedBitStream = serialisedStream.bitStream()
-    let rawBlock = rawBlock.readSerialised(serialisedBitStream)
+    let serialisedBitReader = serialisedStream.bitReader()
+    let rawBlock = rawBlock.readSerialised(serialisedBitReader)
 
     let outputStream = newStringStream()
     defer: outputStream.close()
-    let outputBitStream = outputStream.bitStream()
-    rawBlock.writeRawTo(outputBitStream)
-    outputBitStream.flush()
+    let outputBitWriter = outputStream.bitWriter()
+    rawBlock.writeRawTo(outputBitWriter)
+    outputBitWriter.flush()
 
     outputStream.setPosition(0)
     check outputStream.readUint64 == 0x0EDC_BA98_7654_3210'u64

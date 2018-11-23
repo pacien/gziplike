@@ -15,7 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sequtils
-import integers, bitstream, rawblock, lzssblock
+import integers, bitreader, bitwriter
+import rawblock, lzssblock
 
 type BlockKind* = enum
   uncompressed = 0b00'u8,
@@ -33,32 +34,32 @@ type StreamBlock* = object
     else:
       discard
 
-proc readSerialised*(bitStream: BitStream): StreamBlock =
-  result.last = bitStream.readBool()
-  result.kind = bitStream.readBits(2, uint8).BlockKind
+proc readSerialised*(bitReader: BitReader): StreamBlock =
+  result.last = bitReader.readBool()
+  result.kind = bitReader.readBits(2, uint8).BlockKind
   case result.kind:
-    of uncompressed: result.rawBlock = rawblock.readRaw(bitStream)
-    of lzss: result.lzssBlock = lzssblock.readRaw(bitStream)
+    of uncompressed: result.rawBlock = rawblock.readRaw(bitReader)
+    of lzss: result.lzssBlock = lzssblock.readRaw(bitReader)
     else: raise newException(ValueError, "unhandled block type")
 
-proc writeSerialisedTo*(streamBlock: StreamBlock, bitStream: BitStream) =
-  bitStream.writeBool(streamBlock.last)
-  bitStream.writeBits(2, streamBlock.kind.uint8)
+proc writeSerialisedTo*(streamBlock: StreamBlock, bitWriter: BitWriter) =
+  bitWriter.writeBool(streamBlock.last)
+  bitWriter.writeBits(2, streamBlock.kind.uint8)
   case streamBlock.kind:
-    of uncompressed: streamBlock.rawBlock.writeSerialisedTo(bitStream)
-    of lzss: streamBlock.lzssBlock.writeSerialisedTo(bitStream)
+    of uncompressed: streamBlock.rawBlock.writeSerialisedTo(bitWriter)
+    of lzss: streamBlock.lzssBlock.writeSerialisedTo(bitWriter)
     else: raise newException(ValueError, "unhandled block type")
 
-proc readRaw*(bitStream: BitStream, kind: BlockKind = uncompressed): StreamBlock =
+proc readRaw*(bitReader: BitReader, kind: BlockKind = uncompressed): StreamBlock =
   result.kind = kind
   case kind:
-    of uncompressed: result.rawBlock = rawblock.readRaw(bitStream)
-    of lzss: result.lzssBlock = lzssblock.readRaw(bitStream)
+    of uncompressed: result.rawBlock = rawblock.readRaw(bitReader)
+    of lzss: result.lzssBlock = lzssblock.readRaw(bitReader)
     else: raise newException(ValueError, "unhandled block type")
-  result.last = bitStream.atEnd()
+  result.last = bitReader.atEnd()
 
-proc writeRawTo*(streamBlock: StreamBlock, bitStream: BitStream) =
+proc writeRawTo*(streamBlock: StreamBlock, bitWriter: BitWriter) =
   case streamBlock.kind:
-    of uncompressed: streamBlock.rawBlock.writeRawTo(bitStream)
-    of lzss: streamBlock.lzssBlock.writeRawTo(bitStream)
+    of uncompressed: streamBlock.rawBlock.writeRawTo(bitWriter)
+    of lzss: streamBlock.lzssBlock.writeRawTo(bitWriter)
     else: raise newException(ValueError, "unhandled block type")

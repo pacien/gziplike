@@ -22,3 +22,10 @@ proc `/^`*[T: Natural](x, y: T): T =
 
 proc truncateToUint8*(x: SomeUnsignedInt): uint8 =
   (x and wordBitMask).uint8
+
+iterator chunks*(totalBitLength: int, chunkType: typedesc[SomeInteger]): tuple[index: int, chunkBitLength: int] =
+  let chunkBitLength = sizeof(chunkType) * wordBitLength
+  let wordCount = totalBitLength div chunkBitLength
+  for i in 0..<(wordCount): yield (i, chunkBitLength)
+  let remainder = totalBitLength mod chunkBitLength
+  if remainder > 0: yield (wordCount, remainder)
