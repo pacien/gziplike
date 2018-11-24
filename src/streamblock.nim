@@ -34,6 +34,9 @@ type StreamBlock* = object
     else:
       discard
 
+proc isLast*(streamBlock: StreamBlock): bool =
+  streamBlock.last
+
 proc readSerialised*(bitReader: BitReader): StreamBlock =
   result.last = bitReader.readBool()
   result.kind = bitReader.readBits(2, uint8).BlockKind

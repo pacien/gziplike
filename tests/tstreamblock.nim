@@ -25,6 +25,7 @@ suite "streamblock":
     rawStream.setPosition(0)
     let rawBitReader = rawStream.bitReader()
     let streamBlock = readRaw(rawBitReader, uncompressed)
+    check streamBlock.isLast()
 
     let outputStream = newStringStream()
     defer: outputStream.close()
@@ -58,6 +59,7 @@ suite "streamblock":
     let outputStream = newStringStream()
     defer: outputStream.close()
     let outputBitWriter = outputStream.bitWriter()
+    check streamBlock.isLast()
     streamBlock.writeRawTo(outputBitWriter)
     outputBitWriter.flush()
 
