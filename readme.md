@@ -17,10 +17,13 @@ Building this project requires Nim and Nimble version 0.19.0 or later.
 Usage
 -----
 
+```
+Usage: gziplike <compress|decompress> <input file> <output file>
+```
+
 Compression and decompression are done using the `compress` and `decompress` commands repsectively.
 
-The input stream is read from the standard input.
-The result is outputted to the standard output.
+Paths to the input and output files are given as second and third arguments respectively.
 
 
 License
