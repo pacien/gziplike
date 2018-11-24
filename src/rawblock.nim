@@ -16,7 +16,7 @@
 
 import integers, bitreader, bitwriter
 
-const maxDataBitLength = 100_000_000 * wordBitLength # 100MB
+const maxDataBitLength = high(uint16).int - 1
 const bitLengthFieldBitLength = 2 * wordBitLength
 
 type RawBlock* = object
@@ -25,7 +25,7 @@ type RawBlock* = object
 
 proc readSerialised*(bitReader: BitReader): RawBlock =
   let bitLength = bitReader.readBits(bitLengthFieldBitLength, uint16).int
-  let data = readSeq(bitReader, bitLength, uint8)
+  let data = bitReader.readSeq(bitLength, uint8)
   RawBlock(bitLength: bitLength, data: data.data)
 
 proc writeSerialisedTo*(rawBlock: RawBlock, bitWriter: BitWriter) =
@@ -33,7 +33,7 @@ proc writeSerialisedTo*(rawBlock: RawBlock, bitWriter: BitWriter) =
   bitWriter.writeSeq(rawBlock.bitLength, rawBlock.data)
 
 proc readRaw*(bitReader: BitReader, bits: int = maxDataBitLength): RawBlock =
-  let data = readSeq(bitReader, bits, uint8)
+  let data = bitReader.readSeq(bits, uint8)
   RawBlock(bitLength: data.bitLength, data: data.data)
 
 proc writeRawTo*(rawBlock: RawBlock, bitWriter: BitWriter) =
