@@ -17,20 +17,20 @@
 import os, streams, sugar
 import bitreader, bitwriter, streamblock
 
-proc transform(operation: (BitReader, BitWriter) -> void, input, output: string) =
+proc transform*(operation: (BitReader, BitWriter) -> void, input, output: string) =
   let inputStream = openFileStream(input, fmRead)
   defer: inputStream.close()
   let outputStream = openFileStream(output, fmWrite)
   defer: outputStream.close()
   operation(inputStream.bitReader(), outputStream.bitWriter())
 
-proc compress(bitReader: BitReader, bitWriter: BitWriter) =
+proc compress*(bitReader: BitReader, bitWriter: BitWriter) =
   while not bitReader.atEnd():
     let streamBlock = streamblock.readRaw(bitReader)
     streamBlock.writeSerialisedTo(bitWriter)
   bitWriter.flush()
 
-proc decompress(bitReader: BitReader, bitWriter: BitWriter) =
+proc decompress*(bitReader: BitReader, bitWriter: BitWriter) =
   var hasMore = true
   while hasMore:
     let streamBlock = streamblock.readSerialised(bitReader)
