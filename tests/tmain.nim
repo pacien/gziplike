@@ -23,8 +23,16 @@ suite "main":
   setup: createDir(tempDir)
   teardown: removeDir(tempDir)
 
-  test "identity":
+  test "identity (text)":
     let input = "license.md"
+    let intermediate = tempDir / "compressed"
+    let final = tempDir / "decompressed"
+    compress.transform(input, intermediate)
+    decompress.transform(intermediate, final)
+    check startProcess("cmp", args=[input, final], options={poUsePath}).waitForExit() == 0
+
+  test "identity (binary)":
+    let input = "tests" / "tmain"
     let intermediate = tempDir / "compressed"
     let final = tempDir / "decompressed"
     compress.transform(input, intermediate)
