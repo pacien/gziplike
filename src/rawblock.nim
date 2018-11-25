@@ -16,7 +16,7 @@
 
 import integers, bitreader, bitwriter
 
-const maxDataBitLength = high(uint16).int - 1
+const maxDataBitLength = high(uint16).int
 const bitLengthFieldBitLength = 2 * wordBitLength
 
 type RawBlock* = object

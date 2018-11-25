@@ -48,9 +48,10 @@ proc readBits*[T: SomeUnsignedInt](bitReader: BitReader, bits: int, to: typedesc
 proc readBool*(bitReader: BitReader): bool =
   bitReader.readBits(1, uint8) != 0
 
-proc readSeq*[T: SomeUnsignedInt](bitReader: BitReader, bitLength: int, to: typedesc[T]): tuple[bitLength: int, data: seq[T]] =
-  result = (0, newSeqOfCap[T](bitLength /^ (sizeof(T) * wordBitLength)))
-  for _, chunkBitLength in chunks(bitLength, T):
+proc readSeq*[T: SomeUnsignedInt](bitReader: BitReader, maxBitLength: int, to: typedesc[T]): tuple[bitLength: int, data: seq[T]] =
+  result = (0, newSeqOfCap[T](maxBitLength /^ (sizeof(T) * wordBitLength)))
+  for _, chunkBitLength in chunks(maxBitLength, T):
     if bitReader.atEnd(): return
-    result.bitLength += chunkBitLength
-    result.data.add(bitReader.readBits(chunkBitLength, T))
+    let bitsToRead = if bitReader.stream.atEnd(): sizeof(T) * wordBitLength - bitReader.bitOffset else: chunkBitLength
+    result.bitLength += bitsToRead
+    result.data.add(bitReader.readBits(bitsToRead, T))
