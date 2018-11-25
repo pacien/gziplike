@@ -15,13 +15,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const wordBitLength* = 8
-const wordBitMask* = 0b1111_1111'u8
 
 proc `/^`*[T: Natural](x, y: T): T =
   (x + y - 1) div y
 
 proc truncateToUint8*(x: SomeUnsignedInt): uint8 =
-  (x and wordBitMask).uint8
+  (x and uint8.high).uint8
+
+proc leastSignificantBits*[T: SomeUnsignedInt](x: T, bits: int): T =
+  let maskOffset = sizeof(T) * wordBitLength - bits
+  if maskOffset >= 0: (x shl maskOffset) shr maskOffset else: x
 
 iterator chunks*(totalBitLength: int, chunkType: typedesc[SomeInteger]): tuple[index: int, chunkBitLength: int] =
   let chunkBitLength = sizeof(chunkType) * wordBitLength

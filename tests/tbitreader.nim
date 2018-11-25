@@ -49,6 +49,29 @@ suite "bitreader":
     expect IOError: discard bitReader.readBits(16, uint16)
     check bitReader.atEnd()
 
+  test "readBits (look-ahead overflow)":
+    let stream = newStringStream()
+    defer: stream.close()
+    stream.write(0xAB'u8)
+    stream.setPosition(0)
+
+    let bitReader = stream.bitReader()
+    check bitReader.readBits(4, uint16) == 0x000B'u16
+    check bitReader.readBits(4, uint16) == 0x000A'u16
+    check bitReader.atEnd()
+
+  test "readBits (from buffer composition)":
+    let stream = newStringStream()
+    defer: stream.close()
+    stream.write(0xABCD'u16)
+    stream.setPosition(0)
+
+    let bitReader = stream.bitReader()
+    check bitReader.readBits(4, uint16) == 0x000D'u16
+    check bitReader.readBits(8, uint16) == 0x00BC'u16
+    check bitReader.readBits(4, uint16) == 0x000A'u16
+    check bitReader.atEnd()
+
   test "readSeq":
     let stream = newStringStream()
     defer: stream.close()

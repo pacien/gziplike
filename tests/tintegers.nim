@@ -27,6 +27,13 @@ suite "integers":
     check truncateToUint8(0x00FA'u16) == 0xFA'u8
     check truncateToUint8(0xFFFA'u16) == 0xFA'u8
 
+  test "leastSignificantBits":
+    check leastSignificantBits(0xFF'u8, 3) == 0b0000_0111'u8
+    check leastSignificantBits(0b0001_0101'u8, 3) == 0b0000_0101'u8
+    check leastSignificantBits(0xFF'u8, 10) == 0xFF'u8
+    check leastSignificantBits(0xFFFF'u16, 16) == 0xFFFF'u16
+    check leastSignificantBits(0xFFFF'u16, 8) == 0x00FF'u16
+
   test "chunks iterator":
     check toSeq(chunks(70, uint32)) == @[(0, 32), (1, 32), (2, 6)]
     check toSeq(chunks(32, uint16)) == @[(0, 16), (1, 16)]
