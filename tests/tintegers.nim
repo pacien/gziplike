@@ -27,6 +27,10 @@ suite "integers":
     check truncateToUint8(0x00FA'u16) == 0xFA'u8
     check truncateToUint8(0xFFFA'u16) == 0xFA'u8
 
+  test "bitLength":
+    check bitLength(0b1_1111) == 5
+    check bitLength(0b1000_0000) == 8
+
   test "leastSignificantBits":
     check leastSignificantBits(0xFF'u8, 3) == 0b0000_0111'u8
     check leastSignificantBits(0b0001_0101'u8, 3) == 0b0000_0101'u8

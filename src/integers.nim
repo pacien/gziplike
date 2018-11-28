@@ -22,6 +22,12 @@ proc `/^`*[T: Natural](x, y: T): T =
 proc truncateToUint8*(x: SomeUnsignedInt): uint8 =
   (x and uint8.high).uint8
 
+proc bitLength*[T: SomeUnsignedInt](x: T): int =
+  var buf = x
+  while buf > 0.T:
+    buf = buf shr 1
+    result += 1
+
 proc leastSignificantBits*[T: SomeUnsignedInt](x: T, bits: int): T =
   let maskOffset = sizeof(T) * wordBitLength - bits
   if maskOffset >= 0: (x shl maskOffset) shr maskOffset else: x
