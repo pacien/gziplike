@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest
+import unittest, sequtils, tables
 import polyfill, lzssnode, lzsschain
 
 suite "lzsschain":
-  test "decode":
+  proc chain(): LzssChain =
     let chainArray = [
       lzssCharacter(0), lzssCharacter(1), lzssCharacter(2),
       lzssCharacter(3), lzssCharacter(4), lzssCharacter(5),
@@ -27,4 +27,16 @@ suite "lzsschain":
       lzssReference(3, 3), lzssCharacter(5)]
     var chain = lzssChain()
     for node in chainArray: chain.append(node)
-    check chain.decode() == @[0'u8, 1, 2, 3, 4, 5, 0, 1, 2, 3, 0, 1, 4, 5, 0, 5, 5, 0, 5, 5]
+    result = chain
+
+  test "decode":
+    check chain().decode() == @[0'u8, 1, 2, 3, 4, 5, 0, 1, 2, 3, 0, 1, 4, 5, 0, 5, 5, 0, 5, 5]
+
+  test "stats":
+    let stats = chain().stats()
+    check stats.characters == newCountTable(concat(
+      repeat(0'u8, 2), repeat(1'u8, 2), repeat(2'u8, 1), repeat(3'u8, 1), repeat(4'u8, 1), repeat(5'u8, 3)))
+    check stats.lengths == newCountTable(concat(
+      repeat(3, 2), repeat(4, 1)))
+    check stats.positions == newCountTable(concat(
+      repeat(3, 1), repeat(6, 1), repeat(8, 1)))

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import lists, tables, sugar
-import polyfill, integers, lzssnode
+import polyfill, integers, lzssnode, huffmantree
 
 const maxChainByteLength = 32_000 * wordBitLength
 
@@ -34,3 +34,13 @@ proc decode*(lzssChain: LzssChain): seq[uint8] =
       of reference:
         let absolutePos = result.len - node.relativePos
         result.add(result.toOpenArray(absolutePos, absolutePos + node.length - 1))
+
+proc stats*(lzssChain: LzssChain): tuple[characters: CountTableRef[uint8], lengths, positions: CountTableRef[int]] =
+  result = (newCountTable[uint8](), newCountTable[int](), newCountTable[int]())
+  for node in lzssChain.items:
+    case node.kind:
+      of character:
+        result.characters.inc(node.character)
+      of reference:
+        result.lengths.inc(node.length)
+        result.positions.inc(node.relativePos)
