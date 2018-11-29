@@ -27,12 +27,16 @@ type HuffmanTreeNode*[T: SomeUnsignedInt] = ref object
   case kind: HuffmanTreeNodeKind
     of branch:
       left, right: HuffmanTreeNode[T]
+      maxChildValue: T
     of leaf:
       value: T
   weight: int
 
 proc huffmanBranch*[T](left, right: HuffmanTreeNode[T]): HuffmanTreeNode[T] =
-  HuffmanTreeNode[T](kind: branch, left: left, right: right, weight: left.weight + right.weight)
+  HuffmanTreeNode[T](
+    kind: branch, left: left, right: right,
+    maxChildValue: max(left.maxValue(), right.maxValue()),
+    weight: left.weight + right.weight)
 
 proc huffmanLeaf*[T](value: T, weight = 0): HuffmanTreeNode[T] =
   HuffmanTreeNode[T](kind: leaf, value: value, weight: weight)
@@ -57,7 +61,7 @@ proc `<`*[T](left, right: HuffmanTreeNode[T]): bool =
 
 proc maxValue*[T](node: HuffmanTreeNode[T]): T =
   case node.kind:
-    of branch: max(node.left.maxValue(), node.right.maxValue())
+    of branch: node.maxChildValue
     of leaf: node.value
 
 proc deserialise*[T](bitReader: BitReader, valueType: typedesc[T]): HuffmanTreeNode[T] =
@@ -90,4 +94,4 @@ proc symbolQueue*[T](stats: CountTableRef[T]): HeapQueue[HuffmanTreeNode[T]] =
 proc buildHuffmanTree*[T: SomeUnsignedInt](stats: CountTableRef[T]): HuffmanTreeNode[T] =
   var symbolQueue = symbolQueue(stats)
   while symbolQueue.len > 1: symbolQueue.push(huffmanBranch(symbolQueue.pop(), symbolQueue.pop()))
-  result = symbolQueue[0]
+  symbolQueue[0]
