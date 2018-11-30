@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import tables, heapqueue
-import huffmantree, lzssencoder
+import huffmantree
 
 type WeighedHuffmanTreeNode[T] = ref object
   weight: int

@@ -15,7 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import tables
-import integers, huffmantree, bitio/bitwriter
+import ../integers, ../bitio/bitwriter
+import huffmantree
 
 type HuffmanEncoder*[T, U: SomeUnsignedInt] = object
   codebook: TableRef[T, U]
