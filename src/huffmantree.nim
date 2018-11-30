@@ -30,34 +30,20 @@ type HuffmanTreeNode*[T: SomeUnsignedInt] = ref object
       maxChildValue: T
     of leaf:
       value*: T
-  weight: int
 
 proc huffmanBranch*[T](left, right: HuffmanTreeNode[T]): HuffmanTreeNode[T] =
   HuffmanTreeNode[T](
     kind: branch, left: left, right: right,
-    maxChildValue: max(left.maxValue(), right.maxValue()),
-    weight: left.weight + right.weight)
+    maxChildValue: max(left.maxValue(), right.maxValue()))
 
-proc huffmanLeaf*[T](value: T, weight = 0): HuffmanTreeNode[T] =
-  HuffmanTreeNode[T](kind: leaf, value: value, weight: weight)
+proc huffmanLeaf*[T](value: T): HuffmanTreeNode[T] =
+  HuffmanTreeNode[T](kind: leaf, value: value)
 
 proc `==`*[T](a, b: HuffmanTreeNode[T]): bool =
-  if a.kind != b.kind or a.weight != b.weight: return false
+  if a.kind != b.kind: return false
   case a.kind:
     of branch: a.left == b.left and a.right == b.right
     of leaf: a.value == b.value
-
-proc `~=`*[T](a, b: HuffmanTreeNode[T]): bool =
-  if a.kind != b.kind: return false
-  case a.kind:
-    of branch: a.left ~= b.left and a.right ~= b.right
-    of leaf: a.value == b.value
-
-proc `!~`*[T](a, b: HuffmanTreeNode[T]): bool =
-  not (a ~= b)
-
-proc `<`*[T](left, right: HuffmanTreeNode[T]): bool =
-  left.weight < right.weight
 
 proc maxValue*[T](node: HuffmanTreeNode[T]): T =
   case node.kind:
@@ -86,12 +72,3 @@ proc serialise*[T](tree: HuffmanTreeNode[T], bitWriter: BitWriter) =
         bitWriter.writeBits(valueBitLength, node.value)
   bitWriter.writeBits(valueLengthFieldBitLength, valueBitLength.uint8)
   writeNode(tree)
-
-proc symbolQueue*[T](stats: CountTableRef[T]): HeapQueue[HuffmanTreeNode[T]] =
-  result = newHeapQueue[HuffmanTreeNode[T]]()
-  for item, count in stats.pairs: result.push(huffmanLeaf(item, count))
-
-proc buildHuffmanTree*[T: SomeUnsignedInt](stats: CountTableRef[T]): HuffmanTreeNode[T] =
-  var symbolQueue = symbolQueue(stats)
-  while symbolQueue.len > 1: symbolQueue.push(huffmanBranch(symbolQueue.pop(), symbolQueue.pop()))
-  symbolQueue[0]
