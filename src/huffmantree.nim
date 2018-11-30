@@ -24,12 +24,12 @@ type HuffmanTreeNodeKind* = enum
   leaf
 
 type HuffmanTreeNode*[T: SomeUnsignedInt] = ref object
-  case kind: HuffmanTreeNodeKind
+  case kind*: HuffmanTreeNodeKind
     of branch:
-      left, right: HuffmanTreeNode[T]
+      left*, right*: HuffmanTreeNode[T]
       maxChildValue: T
     of leaf:
-      value: T
+      value*: T
   weight: int
 
 proc huffmanBranch*[T](left, right: HuffmanTreeNode[T]): HuffmanTreeNode[T] =
