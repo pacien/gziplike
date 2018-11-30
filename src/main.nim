@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os, streams, sugar
-import bitio/bitreader, bitio/bitwriter, streamblock
+import bitio/bitreader, bitio/bitwriter, blocks/streamblock
 
 proc transform*(operation: (BitReader, BitWriter) -> void, input, output: string) =
   let inputStream = openFileStream(input, fmRead)
