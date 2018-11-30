@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import tables, heapqueue
-import ../integers, ../bitio/bitreader, ../bitio/bitwriter
+import ../bitio/integers, ../bitio/bitreader, ../bitio/bitwriter
 
 const valueLengthFieldBitLength* = 6  # 64
 

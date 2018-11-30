@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import lists, tables, sugar
-import ../integers, ../huffman/huffmantree
+import ../bitio/integers, ../huffman/huffmantree
 import listpolyfill, lzssnode
 
 const maxChainByteLength = 32_000 * wordBitLength
