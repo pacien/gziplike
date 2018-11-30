@@ -5,7 +5,7 @@ author        = "pacien"
 description   = "gzip-like LZSS compressor"
 license       = "AGPL-3.0-or-later"
 srcDir        = "src"
-bin           = @["main"]
+bin           = @["gziplike"]
 
 
 # Dependencies

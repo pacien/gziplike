@@ -10,7 +10,7 @@ Test and build
 
 Building this project requires Nim and Nimble version 0.19.0 or later.
 
-* `nimble build` produces a binary named `main`
+* `nimble build` produces a binary named `gziplike`
 * `nimble test` runs the included unit tests
 
 
@@ -32,4 +32,3 @@ License
 Copyright (C) 2018 Pacien TRAN-GIRARD.
 
 This project is distributed under the terms of the GNU Affero General Public License v3.0, as detailed in the provided `license.md` file.
-

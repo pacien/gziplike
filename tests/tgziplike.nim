@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, os, ospaths, osproc
-import main
+import gziplike
 
 const tempDir = "tmp"
 
@@ -32,7 +32,7 @@ suite "main":
     check startProcess("cmp", args=[input, final], options={poUsePath}).waitForExit() == 0
 
   test "identity (binary)":
-    let input = "tests" / "tmain"
+    let input = "tests" / "tgziplike"
     let intermediate = tempDir / "compressed"
     let final = tempDir / "decompressed"
     compress.transform(input, intermediate)
