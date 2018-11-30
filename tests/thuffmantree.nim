@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams, sequtils, tables, heapqueue
-import bitreader, bitwriter, huffmantree
+import bitio/bitreader, bitio/bitwriter, huffmantree
 
 suite "huffmantree":
   let tree = huffmanBranch(

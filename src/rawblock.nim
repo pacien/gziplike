@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import integers, bitreader, bitwriter
+import integers, bitio/bitreader, bitio/bitwriter
 
 const maxDataBitLength = high(uint16).int
 const bitLengthFieldBitLength = 2 * wordBitLength

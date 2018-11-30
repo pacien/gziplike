@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import streams
-import integers
+import ../integers
 
 type BitWriter* = ref object
   stream: Stream

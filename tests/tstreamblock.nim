@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams
-import bitreader, bitwriter, streamblock
+import bitio/bitreader, bitio/bitwriter, streamblock
 
 suite "streamblock":
   test "serialise":

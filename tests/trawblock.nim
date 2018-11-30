@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams
-import bitreader, bitwriter, rawblock
+import bitio/bitreader, bitio/bitwriter, rawblock
 
 suite "rawblock":
   test "serialise":

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams, tables
-import bitreader, bitwriter
+import bitio/bitreader, bitio/bitwriter
 import huffmantree, huffmanencoder
 
 suite "huffencoder":
