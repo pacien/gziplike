@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import tables, lists
-import polyfill
+import listpolyfill
 
 type MatchTable*[K, V] =
   TableRef[K, SinglyLinkedList[V]]
@@ -28,5 +28,5 @@ proc matchList*[K, V](matchTable: MatchTable[K, V], pattern: K): SinglyLinkedLis
 
 proc addMatch*[K, V](matchTable: MatchTable[K, V], pattern: K, value: V) =
   var matchList = matchTable.matchList(pattern)
-  polyfill.prepend(matchList, value)
+  listpolyfill.prepend(matchList, value)
   matchTable[pattern] = matchList

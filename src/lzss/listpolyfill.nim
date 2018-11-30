@@ -26,7 +26,7 @@ proc prepend*[T](L: var SinglyLinkedList[T], n: SinglyLinkedNode[T]) =
 
 proc prepend*[T](L: var SinglyLinkedList[T], value: T) =
   ## prepends a node to `L`. Efficiency: O(1).
-  polyfill.prepend(L, newSinglyLinkedNode(value))
+  listpolyfill.prepend(L, newSinglyLinkedNode(value))
 
 proc append*[T](L: var SinglyLinkedList[T], n: SinglyLinkedNode[T]) =
   ## appends a node `n` to `L`. Efficiency: O(1).

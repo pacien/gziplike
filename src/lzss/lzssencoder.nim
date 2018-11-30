@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import lists
-import polyfill, matchtable, lzssnode, lzsschain
+import listpolyfill, matchtable, lzssnode, lzsschain
 
 const matchGroupLength = 3
 const maxRefByteLength = high(uint8).int + matchGroupLength
