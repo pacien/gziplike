@@ -90,15 +90,15 @@ suite "huffencoder":
   test "buildCodebook":
     let codebook = buildCodebook(tree, uint)
     check codebook.len == 3
-    check codebook[1'u] == 0b0
-    check codebook[2'u] == 0b01
-    check codebook[3'u] == 0b11
+    check codebook[1'u] == (1, 0b0'u)
+    check codebook[2'u] == (2, 0b01'u)
+    check codebook[3'u] == (2, 0b11'u)
 
   test "encode":
     let encoder = tree.encoder(uint)
-    check encoder.encode(1'u) == 0b0
-    check encoder.encode(2'u) == 0b01
-    check encoder.encode(3'u) == 0b11
+    check encoder.encode(1'u) == (1, 0b0'u)
+    check encoder.encode(2'u) == (2, 0b01'u)
+    check encoder.encode(3'u) == (2, 0b11'u)
 
 suite "huffdecoder":
   test "decode":

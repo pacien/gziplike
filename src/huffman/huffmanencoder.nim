@@ -19,22 +19,22 @@ import ../bitio/integers, ../bitio/bitwriter
 import huffmantree
 
 type HuffmanEncoder*[T, U: SomeUnsignedInt] = object
-  codebook: TableRef[T, U]
+  codebook: TableRef[T, tuple[bitLength: int, value: U]]
 
-proc buildCodebook*[T, U](tree: HuffmanTreeNode[T], codeType: typedesc[U]): TableRef[T, U] =
-  var codebook = newTable[T, U]()
+proc buildCodebook*[T, U](tree: HuffmanTreeNode[T], codeType: typedesc[U]): TableRef[T, tuple[bitLength: int, value: U]] =
+  var codebook = newTable[T, tuple[bitLength: int, value: U]]()
   proc addCode(node: HuffmanTreeNode[T], path: U, depth: int) =
     case node.kind:
       of branch:
         addCode(node.left, path, depth + 1)
         addCode(node.right, path or (1.U shl depth), depth + 1)
       of leaf:
-        codebook[node.value] = path
+        codebook[node.value] = (depth, path)
   addCode(tree, 0.U, 0)
   codebook
 
 proc encoder*[T, U](tree: HuffmanTreeNode[T], codeType: typedesc[U]): HuffmanEncoder[T, U] =
   HuffmanEncoder[T, U](codebook: buildCodebook(tree, codeType))
 
-proc encode*[T, U](decoder: HuffmanEncoder[T, U], value: T): U =
+proc encode*[T, U](decoder: HuffmanEncoder[T, U], value: T): tuple[bitLength: int, value: U] =
   decoder.codebook[value]
