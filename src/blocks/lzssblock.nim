@@ -14,19 +14,38 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import ../bitio/bitreader, ../bitio/bitwriter
+import lists
+import ../bitio/integers, ../bitio/bitreader, ../bitio/bitwriter
+import ../lzss/lzsschain, ../lzss/lzssencoder
+import ../huffman/huffmantree, ../huffman/huffmantreebuilder, ../huffman/huffmanencoder, ../huffman/huffmandecoder
+import ../lzsshuffman/lzsshuffmanstats, ../lzsshuffman/lzsshuffmandecoder, ../lzsshuffman/lzsshuffmanencoder
+
+const maxDataByteLength = 32_000
 
 type LzssBlock* = object
-  discard
+  lzssChain: LzssChain
 
 proc readSerialised*(bitReader: BitReader): LzssBlock =
-  discard
+  let symbolHuffmanTree = huffmantree.deserialise(bitReader, uint16)
+  let positionHuffmanTree = huffmantree.deserialise(bitReader, uint16)
+  let symbolDecoder = symbolHuffmanTree.decoder()
+  let positionDecoder = positionHuffmanTree.decoder()
+  LzssBlock(lzssChain: readChain(bitReader, symbolDecoder, positionDecoder, maxDataByteLength))
 
 proc writeSerialisedTo*(lzssBlock: LzssBlock, bitWriter: BitWriter) =
-  discard
+  let (symbolStats, positionStats) = aggregateStats(lzssBlock.lzssChain)
+  let symbolHuffmanTree = buildHuffmanTree(symbolStats)
+  let positionHuffmanTree = buildHuffmanTree(positionStats)
+  let symbolEncoder = symbolHuffmanTree.encoder(uint16)
+  let positionEncoder = positionHuffmanTree.encoder(uint16)
+  symbolHuffmanTree.serialise(bitWriter)
+  positionHuffmanTree.serialise(bitWriter)
+  lzssBlock.lzssChain.writeChain(symbolEncoder, positionEncoder, bitWriter)
 
 proc readRaw*(bitReader: BitReader): LzssBlock =
-  discard
+  let byteBuf = bitReader.readSeq(maxDataByteLength, uint8)
+  LzssBlock(lzssChain: lzssEncode(byteBuf.data))
 
 proc writeRawTo*(lzssBlock: LzssBlock, bitWriter: BitWriter) =
-  discard
+  let byteSeq = lzssBlock.lzssChain.decode()
+  bitWriter.writeSeq(byteSeq.len * wordBitLength, byteSeq)

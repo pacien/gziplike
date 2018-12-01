@@ -14,29 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lists, tables, sugar
-import ../bitio/integers
-import listpolyfill, lzssnode
+import tables, lists
+import ../lzss/lzssnode, ../lzss/lzsschain
+import lzsshuffmansymbol
 
-const maxChainByteLength = 32_000 * wordBitLength
-
-type LzssChain* =
-  SinglyLinkedList[LzssNode]
-
-proc lzssChain*(): LzssChain =
-  initSinglyLinkedList[LzssNode]()
-
-proc lzssChain*(chainArray: openArray[LzssNode]): LzssChain =
-  var chain = lzssChain()
-  for node in chainArray: chain.append(node)
-  chain
-
-proc decode*(lzssChain: LzssChain): seq[uint8] =
-  result = newSeqOfCap[uint8](maxChainByteLength)
-  for node in lzssChain.items:
+proc aggregateStats*(chain: LzssChain): tuple[symbolTable, positionTable: CountTableRef[uint16]] =
+  var (symbolTable, positionTable) = (newCountTable[uint16](), newCountTable[uint16]())
+  for node in chain.items:
     case node.kind:
       of character:
-        result.add(node.character)
+        symbolTable.inc(node.character)
       of reference:
-        let absolutePos = result.len - node.relativePos
-        result.add(result.toOpenArray(absolutePos, absolutePos + node.length - 1))
+        symbolTable.inc(shiftLzssLength(node.length))
+        positionTable.inc(node.relativePos.uint16)
+  symbolTable.inc(endSymbol)
+  if positionTable.len < 1: positionTable.inc(0) # ensure non-empty tree
+  (symbolTable, positionTable)

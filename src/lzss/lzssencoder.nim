@@ -17,7 +17,7 @@
 import lists
 import listpolyfill, matchtable, lzssnode, lzsschain
 
-const matchGroupLength = 3
+const matchGroupLength* = 3
 const maxRefByteLength = high(uint8).int + matchGroupLength
 let emptySinglyLinkedList = initSinglyLinkedList[int]()
 

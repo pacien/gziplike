@@ -66,15 +66,6 @@ suite "lzsschain":
   test "decode":
     check chain().decode() == @[0'u8, 1, 2, 3, 4, 5, 0, 1, 2, 3, 0, 1, 4, 5, 0, 5, 5, 0, 5, 5]
  
-  test "stats":
-    let stats = chain().stats()
-    check stats.characters == newCountTable(concat(
-      repeat(0'u8, 2), repeat(1'u8, 2), repeat(2'u8, 1), repeat(3'u8, 1), repeat(4'u8, 1), repeat(5'u8, 3)))
-    check stats.lengths == newCountTable(concat(
-      repeat(3, 2), repeat(4, 1)))
-    check stats.positions == newCountTable(concat(
-      repeat(3, 1), repeat(6, 1), repeat(8, 1)))
-
 suite "lzssencoder":
   test "commonPrefixLength":
     check commonPrefixLength([], [], 0, 10) == 0

@@ -31,6 +31,11 @@ type HuffmanTreeNode*[T: SomeUnsignedInt] = ref object
     of leaf:
       value*: T
 
+proc maxValue*[T](node: HuffmanTreeNode[T]): T =
+  case node.kind:
+    of branch: node.maxChildValue
+    of leaf: node.value
+
 proc huffmanBranch*[T](left, right: HuffmanTreeNode[T]): HuffmanTreeNode[T] =
   HuffmanTreeNode[T](
     kind: branch, left: left, right: right,
@@ -44,11 +49,6 @@ proc `==`*[T](a, b: HuffmanTreeNode[T]): bool =
   case a.kind:
     of branch: a.left == b.left and a.right == b.right
     of leaf: a.value == b.value
-
-proc maxValue*[T](node: HuffmanTreeNode[T]): T =
-  case node.kind:
-    of branch: node.maxChildValue
-    of leaf: node.value
 
 proc deserialise*[T](bitReader: BitReader, valueType: typedesc[T]): HuffmanTreeNode[T] =
   let valueBitLength = bitReader.readBits(valueLengthFieldBitLength, uint8).int

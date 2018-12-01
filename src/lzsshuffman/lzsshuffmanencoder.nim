@@ -14,29 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lists, tables, sugar
-import ../bitio/integers
-import listpolyfill, lzssnode
+import lists
+import ../bitio/bitwriter
+import ../lzss/listpolyfill, ../lzss/lzssnode, ../lzss/lzsschain, ../lzss/lzssencoder
+import ../huffman/huffmantree, ../huffman/huffmantreebuilder, ../huffman/huffmanencoder
+import lzsshuffmansymbol
 
-const maxChainByteLength = 32_000 * wordBitLength
+proc writeSymbol(bitWriter: BitWriter, encodedSymbol: tuple[bitLength: int, value: uint16]) =
+  bitWriter.writeBits(encodedSymbol.bitLength, encodedSymbol.value)
 
-type LzssChain* =
-  SinglyLinkedList[LzssNode]
-
-proc lzssChain*(): LzssChain =
-  initSinglyLinkedList[LzssNode]()
-
-proc lzssChain*(chainArray: openArray[LzssNode]): LzssChain =
-  var chain = lzssChain()
-  for node in chainArray: chain.append(node)
-  chain
-
-proc decode*(lzssChain: LzssChain): seq[uint8] =
-  result = newSeqOfCap[uint8](maxChainByteLength)
+proc writeChain*(lzssChain: LzssChain, symbolEncoder, positionEncoder: HuffmanEncoder[uint16, uint16], bitWriter: BitWriter) =
   for node in lzssChain.items:
     case node.kind:
       of character:
-        result.add(node.character)
+        bitWriter.writeSymbol(symbolEncoder.encode(node.character))
       of reference:
-        let absolutePos = result.len - node.relativePos
-        result.add(result.toOpenArray(absolutePos, absolutePos + node.length - 1))
+        bitWriter.writeSymbol(symbolEncoder.encode(shiftLzssLength(node.length)))
+        bitWriter.writeSymbol(positionEncoder.encode(node.relativePos.uint16))
+  bitWriter.writeSymbol(symbolEncoder.encode(endSymbol))
