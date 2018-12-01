@@ -14,19 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import tables, lists
-import listpolyfill
+import tables
 
-type MatchTable*[K, V] =
-  TableRef[K, SinglyLinkedList[V]]
+type MatchTable*[K, V] = TableRef[K, seq[V]]
 
 proc initMatchTable*[K, V](keyType: typedesc[K], valueType: typedesc[V]): MatchTable[K, V] =
-  newTable[K, SinglyLinkedList[V]]()
+  newTable[K, seq[V]]()
 
-proc matchList*[K, V](matchTable: MatchTable[K, V], pattern: K): SinglyLinkedList[V] =
-  matchTable.getOrDefault(pattern, initSinglyLinkedList[V]())
+proc matchList*[K, V](matchTable: MatchTable[K, V], pattern: K): seq[V] =
+  matchTable.getOrDefault(pattern, newSeq[V]())
 
 proc addMatch*[K, V](matchTable: MatchTable[K, V], pattern: K, value: V) =
   var matchList = matchTable.matchList(pattern)
-  listpolyfill.prepend(matchList, value)
+  matchList.insert(value)
   matchTable[pattern] = matchList

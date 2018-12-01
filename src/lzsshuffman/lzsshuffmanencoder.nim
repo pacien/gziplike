@@ -14,9 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lists
 import ../bitio/bitwriter
-import ../lzss/listpolyfill, ../lzss/lzssnode, ../lzss/lzsschain, ../lzss/lzssencoder
+import ../lzss/lzssnode, ../lzss/lzsschain, ../lzss/lzssencoder
 import ../huffman/huffmantree, ../huffman/huffmantreebuilder, ../huffman/huffmanencoder
 import lzsshuffmansymbol
 
@@ -24,7 +23,7 @@ proc writeSymbol(bitWriter: BitWriter, encodedSymbol: tuple[bitLength: int, valu
   bitWriter.writeBits(encodedSymbol.bitLength, encodedSymbol.value)
 
 proc writeChain*(lzssChain: LzssChain, symbolEncoder, positionEncoder: HuffmanEncoder[uint16, uint16], bitWriter: BitWriter) =
-  for node in lzssChain.items:
+  for node in lzssChain:
     case node.kind:
       of character:
         bitWriter.writeSymbol(symbolEncoder.encode(node.character))

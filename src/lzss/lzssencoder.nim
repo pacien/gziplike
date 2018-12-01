@@ -14,20 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lists
-import listpolyfill, matchtable, lzssnode, lzsschain
+import matchtable, lzssnode, lzsschain
 
 const matchGroupLength* = 3
 const maxRefByteLength = high(uint8).int + matchGroupLength
-let emptySinglyLinkedList = initSinglyLinkedList[int]()
 
 proc commonPrefixLength*(a, b: openArray[uint8], skipFirst, maxLength: int): int =
   result = skipFirst
   let maxPrefixLength = min(min(a.len, b.len), maxLength)
   while result < maxPrefixLength and a[result] == b[result]: result += 1
 
-proc longestPrefix*(candidatePos: SinglyLinkedList[int], searchBuf, lookAheadBuf: openArray[uint8]): tuple[length, pos: int] =
-  for startIndex in candidatePos.items:
+proc longestPrefix*(candidatePos: openArray[int], searchBuf, lookAheadBuf: openArray[uint8]): tuple[length, pos: int] =
+  for startIndex in candidatePos:
     let prefixLength = commonPrefixLength(
       searchBuf.toOpenArray(startIndex, searchBuf.len - 1), lookAheadBuf, matchGroupLength, maxRefByteLength)
     if prefixLength > result.length: result = (prefixLength, startIndex)
@@ -39,20 +37,20 @@ proc addGroups*(matchTable: MatchTable[seq[uint8], int], buffer: openArray[uint8
     matchTable.addMatch(group, cursor)
 
 proc lzssEncode*(buf: openArray[uint8]): LzssChain =
-  result = initSinglyLinkedList[LzssNode]()
+  result = newSeqOfCap[LzssNode](buf.len)
   let matchTable = initMatchTable(seq[uint8], int)
   var cursor = 0
   while cursor < buf.len() - matchGroupLength:
     let matches = matchTable.matchList(buf[cursor..<(cursor + matchGroupLength)])
     let prefix = matches.longestPrefix(buf.toOpenArray(0, cursor - 1), buf.toOpenArray(cursor, buf.len - 1))
     if prefix.length > 0:
-      result.append(lzssReference(prefix.length, cursor - prefix.pos))
+      result.add(lzssReference(prefix.length, cursor - prefix.pos))
       cursor += prefix.length
     else:
-      result.append(lzssCharacter(buf[cursor]))
+      result.add(lzssCharacter(buf[cursor]))
       cursor += 1
     if cursor - prefix.length >= matchGroupLength:
       matchTable.addGroups(buf, cursor - prefix.length - matchGroupLength, cursor)
   while cursor < buf.len:
-    result.append(lzssCharacter(buf[cursor]))
+    result.add(lzssCharacter(buf[cursor]))
     cursor += 1

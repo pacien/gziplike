@@ -14,26 +14,23 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lists, tables, sugar
+import tables, sugar
 import ../bitio/integers
-import listpolyfill, lzssnode
+import lzssnode
 
-const maxChainByteLength = 32_000 * wordBitLength
+const maxChainByteLength = 32_000
 
-type LzssChain* =
-  SinglyLinkedList[LzssNode]
+type LzssChain* = seq[LzssNode]
 
 proc lzssChain*(): LzssChain =
-  initSinglyLinkedList[LzssNode]()
+  newSeq[LzssNode]()
 
 proc lzssChain*(chainArray: openArray[LzssNode]): LzssChain =
-  var chain = lzssChain()
-  for node in chainArray: chain.append(node)
-  chain
+  @chainArray
 
 proc decode*(lzssChain: LzssChain): seq[uint8] =
   result = newSeqOfCap[uint8](maxChainByteLength)
-  for node in lzssChain.items:
+  for node in lzssChain:
     case node.kind:
       of character:
         result.add(node.character)

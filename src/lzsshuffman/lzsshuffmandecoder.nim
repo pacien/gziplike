@@ -14,9 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import lists
 import ../bitio/bitreader
-import ../lzss/listpolyfill, ../lzss/lzssnode, ../lzss/lzsschain
+import ../lzss/lzssnode, ../lzss/lzsschain
 import ../huffman/huffmantree, ../huffman/huffmandecoder
 import lzsshuffmansymbol
 
@@ -26,9 +25,9 @@ proc readChain*(bitReader: BitReader, symbolDecoder, positionDecoder: HuffmanDec
   while not symbol.isEndMarker():
     if byteCursor > maxDataByteLength: raise newException(IOError, "lzss block too long")
     if symbol.isCharacter():
-      chain.append(lzssCharacter(symbol.uint8))
+      chain.add(lzssCharacter(symbol.uint8))
     else:
       let position = positionDecoder.decode(bitReader)
-      chain.append(unpackLzssReference(symbol, position))
+      chain.add(unpackLzssReference(symbol, position))
     (symbol, byteCursor) = (symbolDecoder.decode(bitReader).Symbol, byteCursor + 1)
   chain

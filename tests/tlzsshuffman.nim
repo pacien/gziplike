@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest, tables, lists, sequtils, streams
+import unittest, tables, sequtils, streams
 import bitio/bitwriter, bitio/bitreader
-import lzss/listpolyfill, lzss/lzssnode, lzss/lzsschain
+import lzss/lzssnode, lzss/lzsschain
 import huffman/huffmantree, huffman/huffmantreebuilder, huffman/huffmanencoder, huffman/huffmandecoder
 import lzsshuffman/lzsshuffmansymbol, lzsshuffman/lzsshuffmanstats, lzsshuffman/lzsshuffmanencoder, lzsshuffman/lzsshuffmandecoder
 
@@ -109,7 +109,7 @@ suite "lzsshuffmandecoder":
     stream.setPosition(0)
     let bitReader = stream.bitReader()
     let result = readChain(bitReader, symbolTree.decoder(), positionTree.decoder(), 32_000)
-    check toSeq(result.items).len == 0
+    check result.len == 0
 
   test "readChain (minimal)":
     let symbolTree = huffmanBranch(
@@ -139,6 +139,6 @@ suite "lzsshuffmandecoder":
     stream.setPosition(0)
     let bitReader = stream.bitReader()
     let result = readChain(bitReader, symbolTree.decoder(), positionTree.decoder(), 32_000)
-    check toSeq(result.items) == [
+    check result == [
       lzssCharacter(0), lzssCharacter(1), lzssCharacter(2),
       lzssReference(3, 3), lzssReference(3, 4)]

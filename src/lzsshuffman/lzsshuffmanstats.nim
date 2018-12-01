@@ -20,7 +20,7 @@ import lzsshuffmansymbol
 
 proc aggregateStats*(chain: LzssChain): tuple[symbolTable, positionTable: CountTableRef[uint16]] =
   var (symbolTable, positionTable) = (newCountTable[uint16](), newCountTable[uint16]())
-  for node in chain.items:
+  for node in chain:
     case node.kind:
       of character:
         symbolTable.inc(node.character)
