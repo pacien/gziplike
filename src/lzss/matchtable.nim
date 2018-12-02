@@ -16,15 +16,24 @@
 
 import tables
 
-type MatchTable*[K, V] = TableRef[K, seq[V]]
+type MatchTable*[K, V] = ref object
+  matchLimit: int
+  table: TableRef[K, seq[V]]
 
-proc initMatchTable*[K, V](keyType: typedesc[K], valueType: typedesc[V]): MatchTable[K, V] =
-  newTable[K, seq[V]]()
+proc initMatchTable*[K, V](keyType: typedesc[K], valueType: typedesc[V], matchLimit = 5): MatchTable[K, V] =
+  MatchTable[K, V](matchLimit: matchLimit, table: newTable[K, seq[V]]())
+
+proc len*[K, V](matchTable: MatchTable[K, V]): int =
+  matchTable.table.len
 
 proc matchList*[K, V](matchTable: MatchTable[K, V], pattern: K): seq[V] =
-  matchTable.getOrDefault(pattern, newSeq[V]())
+  if matchTable.table.hasKey(pattern):
+    matchTable.table[pattern]
+  else:
+    newSeqOfCap[V](matchTable.matchLimit)
 
 proc addMatch*[K, V](matchTable: MatchTable[K, V], pattern: K, value: V) =
   var matchList = matchTable.matchList(pattern)
+  if matchList.len >= matchTable.matchLimit: matchList.del(matchList.len - 1)
   matchList.insert(value)
-  matchTable[pattern] = matchList
+  matchTable.table[pattern] = matchList
