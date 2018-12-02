@@ -14,27 +14,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest, os, ospaths, osproc
+import unittest, os, ospaths, osproc, times
 import gziplike
 
-const tempDir = "tmp"
-
 suite "main":
+  const tempDir = "tmp"
+
+  proc testIdentity(input: string, intermediate = tempDir / "compressed", final = tempDir / "decompressed"): bool =
+    let compressionStartTime = getTime()
+    compress.transform(input, intermediate)
+    echo("compression done in ", getTime() - compressionStartTime)
+    echo("compression ratio: ", (intermediate.getFileSize() * 100) div input.getFileSize(), "%")
+    let decompressionStartTime = getTime()
+    decompress.transform(intermediate, final)
+    echo("decompression done in ", getTime() - decompressionStartTime)
+    startProcess("cmp", args=[input, final], options={poUsePath}).waitForExit() == 0
+
   setup: createDir(tempDir)
   teardown: removeDir(tempDir)
 
   test "identity (text)":
-    let input = "license.md"
-    let intermediate = tempDir / "compressed"
-    let final = tempDir / "decompressed"
-    compress.transform(input, intermediate)
-    decompress.transform(intermediate, final)
-    check startProcess("cmp", args=[input, final], options={poUsePath}).waitForExit() == 0
+    check testIdentity("license.md")
 
   test "identity (binary)":
-    let input = "tests" / "tgziplike"
-    let intermediate = tempDir / "compressed"
-    let final = tempDir / "decompressed"
-    compress.transform(input, intermediate)
-    decompress.transform(intermediate, final)
-    check startProcess("cmp", args=[input, final], options={poUsePath}).waitForExit() == 0
+    check testIdentity("tests" / "tgziplike")
