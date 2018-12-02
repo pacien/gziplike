@@ -53,7 +53,7 @@ proc writeSerialisedTo*(streamBlock: StreamBlock, bitWriter: BitWriter) =
     of lzss: streamBlock.lzssBlock.writeSerialisedTo(bitWriter)
     else: raise newException(ValueError, "unhandled block type")
 
-proc readRaw*(bitReader: BitReader, kind: BlockKind = uncompressed): StreamBlock =
+proc readRaw*(bitReader: BitReader, kind: BlockKind = lzss): StreamBlock =
   result.kind = kind
   case kind:
     of uncompressed: result.rawBlock = rawblock.readRaw(bitReader)
