@@ -14,36 +14,37 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import matchtable, lzssnode, lzsschain
+import matchring, matchtable, lzssnode, lzsschain
 
 const matchGroupLength* = 3
 const maxRefByteLength = high(uint8).int + matchGroupLength
 
-proc commonPrefixLength*(a, b: openArray[uint8], skipFirst, maxLength: int): int =
-  result = skipFirst
+proc matchGroup(buf: openArray[uint8], startIndex: int): array[matchGroupLength, uint8] =
+  [buf[startIndex], buf[startIndex + 1], buf[startIndex + 2]]
+
+proc commonPrefixLength*(a, b: openArray[uint8], maxLength: int): int =
   let maxPrefixLength = min(min(a.len, b.len), maxLength)
   while result < maxPrefixLength and a[result] == b[result]: result += 1
 
-proc longestPrefix*(candidatePos: openArray[int], searchBuf, lookAheadBuf: openArray[uint8]): tuple[length, pos: int] =
-  for startIndex in candidatePos:
+proc longestPrefix*(candidatePos: MatchRing, searchBuf, lookAheadBuf: openArray[uint8]): tuple[length, pos: int] =
+  for startIndex in candidatePos.items:
     let prefixLength = commonPrefixLength(
-      searchBuf.toOpenArray(startIndex, searchBuf.len - 1), lookAheadBuf, matchGroupLength, maxRefByteLength)
+      searchBuf.toOpenArray(startIndex, searchBuf.len - 1), lookAheadBuf, maxRefByteLength)
     if prefixLength > result.length: result = (prefixLength, startIndex)
     if prefixLength >= maxRefByteLength: return
 
-proc addGroups*(matchTable: MatchTable[seq[uint8], int], buffer: openArray[uint8], fromPosIncl, toPosExcl: int) =
+proc addGroups*(matchTable: var MatchTable, buf: openArray[uint8], fromPosIncl, toPosExcl: int) =
   for cursor in fromPosIncl..(toPosExcl - matchGroupLength):
-    let group = buffer[cursor..<(cursor + matchGroupLength)]
-    matchTable.addMatch(group, cursor)
+    matchTable.addMatch(buf.matchGroup(cursor), cursor)
 
 proc lzssEncode*(buf: openArray[uint8]): LzssChain =
   result = newSeqOfCap[LzssNode](buf.len)
-  let matchTable = initMatchTable(seq[uint8], int)
+  var matchTable = initMatchTable()
   var cursor = 0
   while cursor < buf.len() - matchGroupLength:
-    let matches = matchTable.matchList(buf[cursor..<(cursor + matchGroupLength)])
-    let prefix = matches.longestPrefix(buf.toOpenArray(0, cursor - 1), buf.toOpenArray(cursor, buf.len - 1))
-    if prefix.length > 0:
+    let probableMatches = matchTable.candidates(buf.matchGroup(cursor))
+    let prefix = probableMatches.longestPrefix(buf.toOpenArray(0, cursor - 1), buf.toOpenArray(cursor, buf.len - 1))
+    if prefix.length >= matchGroupLength:
       result.add(lzssReference(prefix.length, cursor - prefix.pos))
       cursor += prefix.length
     else:

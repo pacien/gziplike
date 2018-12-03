@@ -14,24 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import tables
-import matchring
+const matchLimit* = 4
 
-const matchGroupLength = 3
-const hashShift = 5
-const tableHeight = 0b1 shl 15
+type MatchRing* = object
+  offset, size: int
+  indices: array[matchLimit, int]
 
-type MatchTable* = object
-  table: array[tableHeight, MatchRing]
+proc initMatchRing*(): MatchRing =
+  MatchRing()
 
-proc initMatchTable*(): MatchTable =
-  result = MatchTable()
+proc addMatch*(ring: var MatchRing, index: int) =
+  if ring.size < matchLimit:
+    ring.indices[ring.size] = index
+    ring.size += 1
+  else:
+    let ringIndex = (ring.offset + ring.size) mod matchLimit
+    ring.indices[ringIndex] = index
+    ring.offset = (ring.offset + 1) mod ring.indices.len
 
-proc hash(pattern: array[matchGroupLength, uint8]): int =
-  ((pattern[0].int shl (hashShift * 2)) xor (pattern[1].int shl hashShift) xor pattern[2].int) mod tableHeight
-
-proc addMatch*(matchTable: var MatchTable, pattern: array[matchGroupLength, uint8], index: int) =
-  matchTable.table[hash(pattern)].addMatch(index)
-
-proc candidates*(matchTable: MatchTable, pattern: array[matchGroupLength, uint8]): MatchRing =
-  matchTable.table[hash(pattern)]
+iterator items*(ring: MatchRing): int {.closure.} =
+  for i in countdown(ring.size - 1, 0):
+    yield ring.indices[(ring.offset + i) mod ring.indices.len]
