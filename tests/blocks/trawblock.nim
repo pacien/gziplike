@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams
-import bitio/bitreader, bitio/bitwriter, blocks/rawblock, blocks/streamblock
+import bitio/bitreader, bitio/bitwriter, blocks/rawblock
 
 suite "rawblock":
   test "serialise":
@@ -54,54 +54,4 @@ suite "rawblock":
 
     outputStream.setPosition(0)
     check outputStream.readUint64 == 0x0EDC_BA98_7654_3210'u64
-    check outputStream.atEnd()
-
-suite "streamblock":
-  test "serialise":
-    let rawStream = newStringStream()
-    defer: rawStream.close()
-    rawStream.write(0xFEDC_BA98_7654_3210'u64)
-    rawStream.setPosition(0)
-    let rawBitReader = rawStream.bitReader()
-    let streamBlock = readRaw(rawBitReader, uncompressed)
-    check streamBlock.isLast()
-
-    let outputStream = newStringStream()
-    defer: outputStream.close()
-    let outputBitWriter = outputStream.bitWriter()
-    streamBlock.writeSerialisedTo(outputBitWriter)
-    outputBitWriter.flush()
-
-    outputStream.setPosition(0)
-    let produceReader = outputStream.bitReader()
-    check produceReader.readBool() == true # last block flag
-    check produceReader.readBits(2, uint8) == 0x00'u8 # block kind
-    check produceReader.readBits(16, uint16) == 64 # raw block length
-    check produceReader.readSeq(64, uint8) == (64, @[0x10'u8, 0x32, 0x54, 0x76, 0x98, 0xBA, 0xDC, 0xFE]) # raw block content
-    discard produceReader.readBits(8 - 2 - 1, uint8)
-    check produceReader.atEnd()
-
-  test "deserialise":
-    let serialisedStream = newStringStream()
-    defer: serialisedStream.close()
-    let serialisedBitWriter = serialisedStream.bitWriter()
-    serialisedBitWriter.writeBool(true)
-    serialisedBitWriter.writeBits(2, 0x00'u8)
-    serialisedBitWriter.writeBits(16, 64'u16)
-    serialisedBitWriter.writeBits(64, 0xFEDC_BA98_7654_3210'u64)
-    serialisedBitWriter.flush()
-
-    serialisedStream.setPosition(0)
-    let serialisedBitReader = serialisedStream.bitReader()
-    let streamBlock = streamblock.readSerialised(serialisedBitReader)
-
-    let outputStream = newStringStream()
-    defer: outputStream.close()
-    let outputBitWriter = outputStream.bitWriter()
-    check streamBlock.isLast()
-    streamBlock.writeRawTo(outputBitWriter)
-    outputBitWriter.flush()
-
-    outputStream.setPosition(0)
-    check outputStream.readUint64 == 0xFEDC_BA98_7654_3210'u64
     check outputStream.atEnd()

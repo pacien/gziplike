@@ -37,4 +37,4 @@ suite "main":
     check testIdentity("license.md")
 
   test "identity (binary)":
-    check testIdentity("tests" / "tgziplike")
+    check testIdentity("tests" / "tests")

@@ -14,55 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import unittest, sequtils, tables, lists, algorithm
-import lzss/matchring, lzss/matchtable, lzss/lzssnode, lzss/lzsschain, lzss/lzssencoder
+import unittest, sequtils
+import lzss/matchring, lzss/matchtable, lzss/lzssnode, lzss/lzssencoder
 
-suite "matchring":
-  test "items (empty)":
-    var ring = initMatchRing()
-    check toSeq(ring.items).len == 0
-
-  test "addMatch, items (partial)":
-    var ring = initMatchRing()
-    let items = [0, 1, 2]
-    for i in items: ring.addMatch(i)
-    check toSeq(ring.items) == items.reversed()
-
-  test "addMatch, items (rolling)":
-    var ring = initMatchRing()
-    let items = toSeq(0..13)
-    for i in items: ring.addMatch(i)
-    check toSeq(ring.items) == items[^matchLimit..<items.len].reversed()
-
-suite "matchtable":
-  test "addMatch":
-    var matchTable = initMatchTable()
-    matchTable.addMatch([0'u8, 1, 2], 42)
-    matchTable.addMatch([2'u8, 1, 0], 24)
-    check toSeq(matchTable.candidates([0'u8, 1, 2]).items) == [42]
-    check toSeq(matchTable.candidates([2'u8, 1, 0]).items) == [24]
-    matchTable.addMatch([0'u8, 1, 2], 1337)
-    check toSeq(matchTable.candidates([0'u8, 1, 2]).items) == [1337, 42]
-    check toSeq(matchTable.candidates([2'u8, 1, 0]).items) == [24]
-
-suite "lzssnode":
-  test "equality":
-    check lzssCharacter(1) == lzssCharacter(1)
-    check lzssCharacter(0) != lzssCharacter(1)
-    check lzssReference(0, 1) == lzssReference(0, 1)
-    check lzssReference(1, 0) != lzssReference(0, 1)
-    check lzssCharacter(0) != lzssReference(0, 1)
-
-suite "lzsschain":
-  test "decode":
-    let chain = lzssChain([
-      lzssCharacter(0), lzssCharacter(1), lzssCharacter(2),
-      lzssCharacter(3), lzssCharacter(4), lzssCharacter(5),
-      lzssReference(4, 6), lzssCharacter(0), lzssCharacter(1),
-      lzssReference(3, 8), lzssCharacter(5),
-      lzssReference(3, 3), lzssCharacter(5)])
-    check chain.decode() == @[0'u8, 1, 2, 3, 4, 5, 0, 1, 2, 3, 0, 1, 4, 5, 0, 5, 5, 0, 5, 5]
- 
 suite "lzssencoder":
   test "commonPrefixLength":
     check commonPrefixLength([], [], 10) == 0
