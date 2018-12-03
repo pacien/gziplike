@@ -17,17 +17,24 @@
 import unittest, os, ospaths, osproc, times
 import gziplike
 
+proc log(messages: varargs[string, `$`]) =
+  stdout.write("       ")
+  for msg in messages: stdout.write(msg)
+  stdout.write("\n")
+  stdout.flushFile()
+
 suite "main":
   const tempDir = "tmp"
 
   proc testIdentity(input: string, intermediate = tempDir / "compressed", final = tempDir / "decompressed"): bool =
+    log("working on file: ", input)
     let compressionStartTime = getTime()
     compress.transform(input, intermediate)
-    echo("compression done in ", getTime() - compressionStartTime)
-    echo("compression ratio: ", (intermediate.getFileSize() * 100) div input.getFileSize(), "%")
+    log("compression done in ", getTime() - compressionStartTime)
+    log("compression ratio: ", (intermediate.getFileSize() * 100) div input.getFileSize(), "%")
     let decompressionStartTime = getTime()
     decompress.transform(intermediate, final)
-    echo("decompression done in ", getTime() - decompressionStartTime)
+    log("decompression done in ", getTime() - decompressionStartTime)
     startProcess("cmp", args=[input, final], options={poUsePath}).waitForExit() == 0
 
   setup: createDir(tempDir)
