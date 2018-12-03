@@ -15,36 +15,27 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import unittest, streams
-import bitio/bitreader, bitio/bitwriter, blocks/rawblock
+import bitio/bitreader, bitio/bitwriter, blocks/lzssblock
 
-suite "rawblock":
-  test "serialise":
+suite "lzssblock":
+  test "identity":
+    let value = 0xFEDC_BA98_7654_3210'u64
     let rawStream = newStringStream()
     defer: rawStream.close()
-    rawStream.write(0xFEDC_BA98_7654_3210'u64)
+    rawStream.write(value)
     rawStream.setPosition(0)
     let rawBitReader = rawStream.bitReader()
-    let rawBlock = rawblock.readRaw(rawBitReader)
+    let rawBlock = lzssblock.readRaw(rawBitReader)
 
-    let outputStream = newStringStream()
-    defer: outputStream.close()
-    let outputBitWriter = outputStream.bitWriter()
-    rawBlock.writeSerialisedTo(outputBitWriter)
-    outputBitWriter.flush()
-
-    outputStream.setPosition(0)
-    check outputStream.readUint16() == 64
-    check outputStream.readUint64() == 0xFEDC_BA98_7654_3210'u64
-    check outputStream.atEnd()
-
-  test "deserialise":
     let serialisedStream = newStringStream()
     defer: serialisedStream.close()
-    serialisedStream.write(60'u16)
-    serialisedStream.write(0xFEDC_BA98_7654_3210'u64)
+    let serialisedBitWriter = serialisedStream.bitWriter()
+    rawBlock.writeSerialisedTo(serialisedBitWriter)
+    serialisedBitWriter.flush()
+
     serialisedStream.setPosition(0)
     let serialisedBitReader = serialisedStream.bitReader()
-    let rawBlock = rawblock.readSerialised(serialisedBitReader)
+    let lzssBlock = lzssblock.readSerialised(serialisedBitReader)
 
     let outputStream = newStringStream()
     defer: outputStream.close()
@@ -53,5 +44,5 @@ suite "rawblock":
     outputBitWriter.flush()
 
     outputStream.setPosition(0)
-    check outputStream.readUint64 == 0x0EDC_BA98_7654_3210'u64
+    check outputStream.readUint64 == value
     check outputStream.atEnd()

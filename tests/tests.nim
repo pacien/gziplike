@@ -36,7 +36,7 @@ import
   lzsshuffman/tlzsshuffmandecoder,
 
   blocks/trawblock,
-  # TODO: add lzssblock test
+  blocks/tlzssblock,
   blocks/streamblock,
 
   gziplike/tgziplike
